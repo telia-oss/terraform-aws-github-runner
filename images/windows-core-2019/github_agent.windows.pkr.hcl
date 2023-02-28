@@ -22,7 +22,7 @@ variable "region" {
 variable "instance_type" {
   description = "The instance type Packer will use for the builder"
   type        = string
-  default     = "t3a.medium"
+  default     = "t3.2xlarge"
 }
 
 variable "ebs_delete_on_termination" {
