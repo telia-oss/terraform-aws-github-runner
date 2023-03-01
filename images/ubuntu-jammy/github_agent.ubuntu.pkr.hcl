@@ -16,7 +16,7 @@ variable "runner_version" {
 variable "region" {
   description = "The region to build the image in"
   type        = string
-  default     = "eu-west-1"
+  default     = "eu-north-1"
 }
 
 variable "security_group_id" {
@@ -40,7 +40,7 @@ variable "associate_public_ip_address" {
 variable "instance_type" {
   description = "The instance type Packer will use for the builder"
   type        = string
-  default     = "t3.medium"
+  default     = "t3.2xlarge"
 }
 
 variable "root_volume_size_gb" {

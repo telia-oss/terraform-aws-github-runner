@@ -16,7 +16,7 @@ variable "action_runner_url" {
 variable "region" {
   description = "The region to build the image in"
   type        = string
-  default     = "eu-west-1"
+  default     = "eu-north-1"
 }
 
 variable "instance_type" {
