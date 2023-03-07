@@ -3,7 +3,7 @@ $VerbosePreference = "Continue"
 
 # Install visual studio and sql data
 Invoke-WebRequest -Uri https://aka.ms/vs/16/release/vs_community.exe -OutFile $env:TEMP\vs_community.exe
-$process = Start-Process -FilePath $env:TEMP\vs_community.exe -ArgumentList "--installPath", "C:\VisualStudio","--add", "Microsoft.VisualStudio.Workload.ManagedDesktop","--add", "Microsoft.VisualStudio.Component.SQL.SSDT", "--passive", "--wait" -Wait -PassThru
+$process = Start-Process -FilePath $env:TEMP\vs_community.exe -ArgumentList "--installPath", "C:\VisualStudio","--add", "Microsoft.VisualStudio.Workload.ManagedDesktop","--add", "Microsoft.VisualStudio.Component.SQL.SSDT","--add", "Microsoft.VisualStudio.Component.Web", "--passive", "--wait" -Wait -PassThru
 Write-Output $process.ExitCode
 
 # Install Chocolatey
