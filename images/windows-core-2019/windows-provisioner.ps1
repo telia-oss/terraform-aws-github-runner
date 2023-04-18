@@ -6,6 +6,14 @@ Invoke-WebRequest -Uri https://aka.ms/vs/16/release/vs_community.exe -OutFile $e
 $process = Start-Process -FilePath $env:TEMP\vs_community.exe -ArgumentList "--installPath", "C:\VisualStudio","--add", "Microsoft.VisualStudio.Workload.ManagedDesktop","--add", "Microsoft.VisualStudio.Component.SQL.SSDT","--add", "Microsoft.VisualStudio.Component.Web", "--passive", "--wait" -Wait -PassThru
 Write-Output $process.ExitCode
 
+# Set system variables
+$msBuildPath = "C:\VisualStudio\MSBuild\Current\bin"
+$registryPath = "Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment"
+$oldPath = (Get-ItemProperty -Path $registryPath -Name PATH).path
+$newPath = "$oldpath;$msBuildPath"
+Set-ItemProperty -Path "$registryPath" -Name PATH -Value "$newPath"
+
+
 # Install Chocolatey
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 $env:chocolateyUseWindowsCompression = 'true'
