@@ -9,6 +9,14 @@ $process = Start-Process -FilePath $env:TEMP\vs_community.exe -ArgumentList "--i
 Write-Output $process.ExitCode
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
 
+# Set system variables
+$msBuildPath = "C:\VisualStudio\MSBuild\Current\bin"
+$registryPath = "Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment"
+$oldPath = (Get-ItemProperty -Path $registryPath -Name PATH).path
+$newPath = "$oldpath;$msBuildPath"
+Set-ItemProperty -Path "$registryPath" -Name PATH -Value "$newPath"
+
+
 # Install Chocolatey
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 $env:chocolateyUseWindowsCompression = 'true'
