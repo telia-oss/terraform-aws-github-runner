@@ -3,7 +3,8 @@
 Write-Output "Running User Data Script"
 Write-Host "(host) Running User Data Script"
 
-Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force
+Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope LocalMachine  -ErrorAction Continue | Out-Null
+Get-ExecutionPolicy -List
 
 # Don't set this before Set-ExecutionPolicy as it throws an error
 $ErrorActionPreference = "stop"
