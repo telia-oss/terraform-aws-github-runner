@@ -1,10 +1,13 @@
 $ErrorActionPreference = "Continue"
 $VerbosePreference = "Continue"
 
-# Install visual studio and sql data
+Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force -ErrorAction Ignore
+
+# Install msbuild
 Invoke-WebRequest -Uri https://aka.ms/vs/16/release/vs_community.exe -OutFile $env:TEMP\vs_community.exe
 $process = Start-Process -FilePath $env:TEMP\vs_community.exe -ArgumentList "--installPath", "C:\VisualStudio","--add", "Microsoft.VisualStudio.Workload.ManagedDesktop","--add", "Microsoft.VisualStudio.Component.SQL.SSDT","--add", "Microsoft.VisualStudio.Component.Web", "--passive", "--wait" -Wait -PassThru
 Write-Output $process.ExitCode
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
 
 # Install Chocolatey
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
