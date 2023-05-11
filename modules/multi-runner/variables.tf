@@ -324,6 +324,12 @@ variable "runner_binaries_s3_sse_configuration" {
   default     = {}
 }
 
+variable "runner_binaries_s3_versioning" {
+  description = "Status of S3 versioning for runner-binaries S3 bucket. Once set to Enabled the change cannot be reverted via Terraform!"
+  type        = string
+  default     = "Disabled"
+}
+
 variable "runner_binaries_syncer_lambda_timeout" {
   description = "Time out of the binaries sync lambda in seconds."
   type        = number
@@ -526,4 +532,10 @@ variable "ssm_paths" {
     runners = optional(string, "runners")
   })
   default = {}
+}
+
+variable "lambda_tracing_mode" {
+  description = "Enable X-Ray tracing for the lambda functions."
+  type        = string
+  default     = null
 }

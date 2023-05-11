@@ -141,6 +141,12 @@ variable "runner_binaries_s3_sse_configuration" {
   }
 }
 
+variable "runner_binaries_s3_versioning" {
+  description = "Status of S3 versioning for runner-binaries S3 bucket. Once set to Enabled the change cannot be reverted via Terraform!"
+  type        = string
+  default     = "Disabled"
+}
+
 variable "runner_binaries_s3_logging_bucket" {
   description = "Bucket for action runner distribution bucket access logging."
   type        = string
@@ -764,4 +770,10 @@ variable "runner_name_prefix" {
     condition     = length(var.runner_name_prefix) <= 45
     error_message = "The prefix used for the GitHub runner name must be less than 32 characters. AWS instances id are 17 chars, https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/resource-ids.html"
   }
+}
+
+variable "lambda_tracing_mode" {
+  description = "Enable X-Ray tracing for the lambda functions."
+  type        = string
+  default     = null
 }
