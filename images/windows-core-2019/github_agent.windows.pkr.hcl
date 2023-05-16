@@ -60,6 +60,7 @@ source "amazon-ebs" "githubrunner" {
   instance_type               = var.instance_type
   region                      = var.region
   associate_public_ip_address = var.associate_public_ip_address
+  no_ephemeral          = true
 
   source_ami_filter {
     filters = {
