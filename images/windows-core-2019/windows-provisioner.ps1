@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Continue"
 $VerbosePreference = "Continue"
 
-# Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force -ErrorAction Ignore
+Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force -ErrorAction Ignore
 
 Write-Host "Starting Install msbuild..."
 
@@ -23,6 +23,27 @@ $oldPath = (Get-ItemProperty -Path $registryPath -Name PATH).path
 $newPath = "$oldpath;$msBuildPath"
 Set-ItemProperty -Path "$registryPath" -Name PATH -Value "$newPath"
 
+# Install Chocolatey
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+$env:chocolateyUseWindowsCompression = 'true'
+Invoke-WebRequest https://chocolatey.org/install.ps1 -UseBasicParsing | Invoke-Expression
+
+# Add Chocolatey to powershell profile
+$ChocoProfileValue = @'
+$ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+if (Test-Path($ChocolateyProfile)) {
+  Import-Module "$ChocolateyProfile"
+}
+
+refreshenv
+'@
+
+# Write it to the $profile location
+Set-Content -Path "$PsHome\Microsoft.PowerShell_profile.ps1" -Value $ChocoProfileValue -Force
+# Source it
+. "$PsHome\Microsoft.PowerShell_profile.ps1"
+
+refreshenv
 
 Write-Host "Installing cloudwatch agent..."
 Invoke-WebRequest -Uri https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi -OutFile C:\amazon-cloudwatch-agent.msi
@@ -32,9 +53,8 @@ Remove-Item C:\amazon-cloudwatch-agent.msi
 
 # Install dependent tools
 Write-Host "Installing additional development tools"
-Invoke-WebRequest -Uri "https://awscli.amazonaws.com/AWSCLIV2.msi" -OutFile "AWSCLIV2.msi"
-Start-Process -FilePath "msiexec.exe" -ArgumentList "/i AWSCLIV2.msi /qn /norestart" -Wait
-
+choco install git awscli -y
+refreshenv
 
 Write-Host "Creating actions-runner directory for the GH Action installtion"
 New-Item -ItemType Directory -Path C:\actions-runner ; Set-Location C:\actions-runner
