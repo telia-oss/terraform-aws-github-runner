@@ -1,12 +1,20 @@
 $ErrorActionPreference = "Continue"
 $VerbosePreference = "Continue"
 
-Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force -ErrorAction Ignore
+# Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force -ErrorAction Ignore
 
-# Install msbuild
-Invoke-WebRequest -Uri https://aka.ms/vs/16/release/vs_community.exe -OutFile $env:TEMP\vs_community.exe
-$process = Start-Process -FilePath $env:TEMP\vs_community.exe -ArgumentList "--installPath", "C:\VisualStudio","--all", "--passive", "--wait" -Wait -PassThru
-Write-Output $process.ExitCode
+Write-Host "Starting Install msbuild..."
+
+try {
+    Invoke-WebRequest -Uri https://aka.ms/vs/16/release/vs_community.exe -OutFile $env:TEMP\vs_community.exe
+    $process = Start-Process -FilePath $env:TEMP\vs_community.exe -ArgumentList "--installPath", "C:\VisualStudio", "--allWorkloads", "--includeRecommended", "--passive", "--wait" -Wait -PassThru
+    if ($process.ExitCode -ne 0) {
+        Write-Error "Installation process exited with code $($process.ExitCode)"
+    }
+}
+catch {
+    Write-Error $_.Exception.Message
+}
 
 # Set system variables
 $msBuildPath = "C:\VisualStudio\MSBuild\Current\bin"
@@ -16,27 +24,6 @@ $newPath = "$oldpath;$msBuildPath"
 Set-ItemProperty -Path "$registryPath" -Name PATH -Value "$newPath"
 
 
-# Install Chocolatey
-[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
-$env:chocolateyUseWindowsCompression = 'true'
-Invoke-WebRequest https://chocolatey.org/install.ps1 -UseBasicParsing | Invoke-Expression
-
-# Add Chocolatey to powershell profile
-$ChocoProfileValue = @'
-$ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-if (Test-Path($ChocolateyProfile)) {
-  Import-Module "$ChocolateyProfile"
-}
-
-refreshenv
-'@
-# Write it to the $profile location
-Set-Content -Path "$PsHome\Microsoft.PowerShell_profile.ps1" -Value $ChocoProfileValue -Force
-# Source it
-. "$PsHome\Microsoft.PowerShell_profile.ps1"
-
-refreshenv
-
 Write-Host "Installing cloudwatch agent..."
 Invoke-WebRequest -Uri https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi -OutFile C:\amazon-cloudwatch-agent.msi
 $cloudwatchParams = '/i', 'C:\amazon-cloudwatch-agent.msi', '/qn', '/L*v', 'C:\CloudwatchInstall.log'
@@ -45,8 +32,9 @@ Remove-Item C:\amazon-cloudwatch-agent.msi
 
 # Install dependent tools
 Write-Host "Installing additional development tools"
-choco install git awscli -y
-refreshenv
+Invoke-WebRequest -Uri "https://awscli.amazonaws.com/AWSCLIV2.msi" -OutFile "AWSCLIV2.msi"
+Start-Process -FilePath "msiexec.exe" -ArgumentList "/i AWSCLIV2.msi /qn /norestart" -Wait
+
 
 Write-Host "Creating actions-runner directory for the GH Action installtion"
 New-Item -ItemType Directory -Path C:\actions-runner ; Set-Location C:\actions-runner
