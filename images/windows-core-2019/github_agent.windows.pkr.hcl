@@ -84,7 +84,7 @@ source "amazon-ebs" "githubrunner" {
   launch_block_device_mappings {
     device_name           = "/dev/sda1"
     delete_on_termination = "${var.ebs_delete_on_termination}"
-    volume_size           = 300
+    volume_size           = 150
   }
 }
 
