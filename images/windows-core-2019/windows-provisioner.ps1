@@ -23,6 +23,23 @@ $oldPath = (Get-ItemProperty -Path $registryPath -Name PATH).path
 $newPath = "$oldpath;$msBuildPath"
 Set-ItemProperty -Path "$registryPath" -Name PATH -Value "$newPath"
 
+# Install .net 4
+
+# Define the URL for the .NET Framework 4.8 Developer Pack
+$url = "https://go.microsoft.com/fwlink/?linkid=2088517"
+
+# Define the path where the installer will be saved
+$output = "$env:TEMP\ndp48-devpack-enu.exe"
+
+# Download the installer
+Invoke-WebRequest -Uri $url -OutFile $output
+
+# Run the installer
+Start-Process -FilePath $output -Args "/quiet /norestart" -Wait -Passthru
+
+# Delete the installer
+Remove-Item -Path $output
+
 # Install Chocolatey
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 $env:chocolateyUseWindowsCompression = 'true'
