@@ -1,10 +1,10 @@
 $ErrorActionPreference = "Continue"
 $VerbosePreference = "Continue"
 
-Write-Host "Starting Install msbuild..."
+Write-Host "Starting Install msbuild..."https://github.com/telia-oss/terraform-aws-github-runner/blob/main/images/windows-core-2019/windows-provisioner.ps1
 try {
     Invoke-WebRequest -Uri https://aka.ms/vs/16/release/vs_community.exe -OutFile $env:TEMP\vs_community.exe
-    $process = Start-Process -FilePath $env:TEMP\vs_community.exe -ArgumentList "--installPath", "C:\VisualStudio", "--allWorkloads", "--includeRecommended", "--passive", "--wait" -Wait -PassThru
+    $process = Start-Process -FilePath $env:TEMP\vs_community.exe -ArgumentList "--installPath", "C:\VisualStudio", "--allWorkloads", "--includeRecommended","--add" "Microsoft.Net.Component.4.TargetingPack", "--passive", "--wait" -Wait -PassThru
     if ($process.ExitCode -ne 0) {
         Write-Error "Installation process exited with code $($process.ExitCode)"
     }
