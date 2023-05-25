@@ -61,6 +61,7 @@ Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
 Start-Process msiexec.exe -Wait -ArgumentList "/I $installerPath /quiet"
 
 # Verify the installation
+refreshenv
 aws --version
 
 Write-Host "Creating actions-runner directory for the GH Action installtion"

@@ -28,6 +28,7 @@ $url = "https://go.microsoft.com/fwlink/?linkid=2088517"
 # Define the path where the installer will be saved
 $output = "$env:TEMP\ndp48-devpack-enu.exe"
 
+
 # Download the installer
 Invoke-WebRequest -Uri $url -OutFile $output
 
@@ -39,11 +40,16 @@ Remove-Item -Path $output
 Write-Host "Finished installing .net dev pack 4.8"
 
 
+Write-Host "Enable long path behavior"
+# See https://docs.microsoft.com/en-us/windows/desktop/fileio/naming-a-file#maximum-path-length-limitation
+Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' -Name 'LongPathsEnabled' -Value 1
+
 Write-Host "Installing cloudwatch agent..."
 Invoke-WebRequest -Uri https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi -OutFile C:\amazon-cloudwatch-agent.msi
 $cloudwatchParams = '/i', 'C:\amazon-cloudwatch-agent.msi', '/qn', '/L*v', 'C:\CloudwatchInstall.log'
 Start-Process "msiexec.exe" $cloudwatchParams -Wait -NoNewWindow
 Remove-Item C:\amazon-cloudwatch-agent.msi
+
 
 # Install dependent tools
 Write-Host "Installing additional development tools"
@@ -61,6 +67,7 @@ Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
 Start-Process msiexec.exe -Wait -ArgumentList "/I $installerPath /quiet"
 
 # Verify the installation
+refreshenv
 aws --version
 
 Write-Host "Creating actions-runner directory for the GH Action installtion"

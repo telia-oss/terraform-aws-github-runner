@@ -5,24 +5,24 @@ Start-Transcript -Path "C:\UserData.log" -Append
 
 ${pre_install}
 
-# Install Chocolatey
-[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
-$env:chocolateyUseWindowsCompression = 'true'
-Invoke-WebRequest https://chocolatey.org/install.ps1 -UseBasicParsing | Invoke-Expression
+# # Install Chocolatey
+# [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+# $env:chocolateyUseWindowsCompression = 'true'
+# Invoke-WebRequest https://chocolatey.org/install.ps1 -UseBasicParsing | Invoke-Expression
 
 # Add Chocolatey to powershell profile
-$ChocoProfileValue = @'
-$ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-if (Test-Path($ChocolateyProfile)) {
-  Import-Module "$ChocolateyProfile"
-}
+# $ChocoProfileValue = @'
+# # $ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+# # if (Test-Path($ChocolateyProfile)) {
+# #   Import-Module "$ChocolateyProfile"
+# # }
 
 refreshenv
-'@
-# Write it to the $profile location
-Set-Content -Path "$PsHome\Microsoft.PowerShell_profile.ps1" -Value $ChocoProfileValue -Force
-# Source it
-. "$PsHome\Microsoft.PowerShell_profile.ps1"
+# '@
+# # Write it to the $profile location
+# Set-Content -Path "$PsHome\Microsoft.PowerShell_profile.ps1" -Value $ChocoProfileValue -Force
+# # Source it
+# . "$PsHome\Microsoft.PowerShell_profile.ps1"
 
 
 refreshenv
@@ -36,7 +36,20 @@ Remove-Item C:\amazon-cloudwatch-agent.msi
 
 # Install dependent tools
 Write-Host "Installing additional development tools"
-choco install git awscli -y
+# Define the URL of the AWS CLI MSI installer
+$installerUrl = "https://awscli.amazonaws.com/AWSCLIV2.msi"
+
+# Define the path where the installer will be saved
+$installerPath = "$env:TEMP\AWSCLIV2.msi"
+
+# Download the installer
+Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
+
+# Install the AWS CLI
+Start-Process msiexec.exe -Wait -ArgumentList "/I $installerPath /quiet"
+
+# Verify the installation
+aws --version
 refreshenv
 
 ${install_runner}
