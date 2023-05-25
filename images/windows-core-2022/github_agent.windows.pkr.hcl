@@ -15,7 +15,7 @@ variable "runner_version" {
 variable "region" {
   description = "The region to build the image in"
   type        = string
-  default     = "eu-west-1"
+  default     = "eu-north-1"
 }
 
 variable "security_group_id" {
@@ -32,7 +32,7 @@ variable "subnet_id" {
 
 variable "root_volume_size_gb" {
   type    = number
-  default = 30
+  default = 150
 }
 
 variable "ebs_delete_on_termination" {
@@ -94,10 +94,10 @@ source "amazon-ebs" "githubrunner" {
   winrm_use_ssl  = true
   winrm_username = "Administrator"
 
-  launch_block_device_mappings {
+   launch_block_device_mappings {
     device_name           = "/dev/sda1"
-    volume_size           = "${var.root_volume_size_gb}"
     delete_on_termination = "${var.ebs_delete_on_termination}"
+    volume_size           = 150
   }
 }
 
