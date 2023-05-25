@@ -4,7 +4,7 @@ $VerbosePreference = "Continue"
 Write-Host "Starting Install msbuild..."
 try {
     Invoke-WebRequest -Uri https://aka.ms/vs/16/release/vs_community.exe -OutFile $env:TEMP\vs_community.exe
-    $process = Start-Process -FilePath $env:TEMP\vs_community.exe -ArgumentList "--installPath", "C:\VisualStudio", "--allWorkloads", "--includeRecommended", "--passive", "--wait" -Wait -PassThru
+    $process = Start-Process -FilePath $env:TEMP\vs_community.exe -ArgumentList "--installPath", "C:\VisualStudio", "--all", "--passive", "--wait" -Wait -PassThru
     if ($process.ExitCode -ne 0) {
         Write-Error "Installation process exited with code $($process.ExitCode)"
     }
