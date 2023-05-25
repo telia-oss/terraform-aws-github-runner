@@ -32,7 +32,7 @@ variable "subnet_id" {
 
 variable "root_volume_size_gb" {
   type    = number
-  default = 150
+  default = 350
 }
 
 variable "ebs_delete_on_termination" {
@@ -97,7 +97,7 @@ source "amazon-ebs" "githubrunner" {
    launch_block_device_mappings {
     device_name           = "/dev/sda1"
     delete_on_termination = "${var.ebs_delete_on_termination}"
-    volume_size           = 150
+    volume_size           = 350
   }
 }
 
