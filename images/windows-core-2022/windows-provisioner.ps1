@@ -1,6 +1,9 @@
 $ErrorActionPreference = "Continue"
 $VerbosePreference = "Continue"
 
+Write-Host "Disabling Windows Defender"
+remove-WindowsFeature Windows-Defender
+
 Write-Host "Starting Install msbuild..."
 try {
     Invoke-WebRequest -Uri https://aka.ms/vs/16/release/vs_community.exe -OutFile $env:TEMP\vs_community.exe
