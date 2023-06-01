@@ -68,7 +68,7 @@ locals {
 source "amazon-ebs" "githubrunner" {
   ami_name                    = "github-runner-windows-core-2022-${formatdate("YYYYMMDDhhmm", timestamp())}"
   communicator                = "winrm"
-  instance_type               = "t3.2xlarge"
+  instance_type               = "m5d.2xlarge"
   region                      = var.region
   security_group_id           = var.security_group_id
   subnet_id                   = var.subnet_id
