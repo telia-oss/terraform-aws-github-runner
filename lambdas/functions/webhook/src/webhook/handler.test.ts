@@ -1,5 +1,5 @@
 import { Webhooks } from '@octokit/webhooks';
-import { getParameterValue } from '@terraform-aws-github-runner/aws-ssm-util';
+import { getParameter } from '@terraform-aws-github-runner/aws-ssm-util';
 import { mocked } from 'jest-mock';
 import nock from 'nock';
 
@@ -41,7 +41,7 @@ describe('handler', () => {
     jest.clearAllMocks();
     jest.resetAllMocks();
 
-    const mockedGet = mocked(getParameterValue);
+    const mockedGet = mocked(getParameter);
     mockedGet.mockResolvedValueOnce(GITHUB_APP_WEBHOOK_SECRET);
   });
 
@@ -245,6 +245,34 @@ describe('handler', () => {
           ...queuesConfig[0],
           matcherConfig: {
             labelMatchers: [['self-hosted', 'x64', 'linux']],
+            exactMatch: true,
+          },
+        },
+      ]);
+      const event = JSON.stringify({
+        ...workflowjob_event,
+        workflow_job: {
+          ...workflowjob_event.workflow_job,
+          labels: ['self-hosted', 'linux', 'x64', 'on-demand'],
+        },
+      });
+      const resp = await handle(
+        { 'X-Hub-Signature': await webhooks.sign(event), 'X-GitHub-Event': 'workflow_job' },
+        event,
+      );
+      expect(resp.statusCode).toBe(202);
+      expect(sendActionRequest).not.toBeCalled;
+    });
+
+    it('Check webhook does not accept jobs where the job labels are spread across label matchers.', async () => {
+      process.env.RUNNER_CONFIG = JSON.stringify([
+        {
+          ...queuesConfig[0],
+          matcherConfig: {
+            labelMatchers: [
+              ['self-hosted', 'x64', 'linux'],
+              ['self-hosted', 'x64', 'on-demand'],
+            ],
             exactMatch: true,
           },
         },

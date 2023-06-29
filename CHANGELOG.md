@@ -1,5 +1,57 @@
 # Changelog
 
+## [3.5.0](https://github.com/philips-labs/terraform-aws-github-runner/compare/v3.4.2...v3.5.0) (2023-06-21)
+
+
+### Features
+
+* Support AWS 5.x Terraform provider ([#3315](https://github.com/philips-labs/terraform-aws-github-runner/issues/3315)) ([d0e8960](https://github.com/philips-labs/terraform-aws-github-runner/commit/d0e89608f52ff0db4abe204af6718a73e780ea98))
+
+
+### Bug Fixes
+
+* **lambda:** bump @aws-sdk/client-ec2 from 3.352.0 to 3.356.0 in /lambdas ([#3333](https://github.com/philips-labs/terraform-aws-github-runner/issues/3333)) ([9cb0369](https://github.com/philips-labs/terraform-aws-github-runner/commit/9cb0369195855ea2e1f75f905098588101a166f8))
+* **lambda:** bump @aws-sdk/client-s3 from 3.352.0 to 3.354.0 in /lambdas ([#3329](https://github.com/philips-labs/terraform-aws-github-runner/issues/3329)) ([37acc92](https://github.com/philips-labs/terraform-aws-github-runner/commit/37acc9247526fdfbe940fca1ad19beea89f3576c))
+* **lambda:** bump @aws-sdk/client-ssm from 3.321.1 to 3.350.0 in /lambdas ([#3319](https://github.com/philips-labs/terraform-aws-github-runner/issues/3319)) ([97d5c73](https://github.com/philips-labs/terraform-aws-github-runner/commit/97d5c7384cbeec38ee0d9b16167ed4a2f883d291))
+* **lambda:** bump @aws-sdk/client-ssm from 3.352.0 to 3.354.0 in /lambdas ([#3327](https://github.com/philips-labs/terraform-aws-github-runner/issues/3327)) ([e315230](https://github.com/philips-labs/terraform-aws-github-runner/commit/e315230f42d9b321a3ba28ff7f9294fc77dec78d))
+
+## [3.4.2](https://github.com/philips-labs/terraform-aws-github-runner/compare/v3.4.1...v3.4.2) (2023-06-13)
+
+
+### Bug Fixes
+
+* Fix pool logic with runner name prefix ([#3303](https://github.com/philips-labs/terraform-aws-github-runner/issues/3303)) ([66e2a66](https://github.com/philips-labs/terraform-aws-github-runner/commit/66e2a66adcf200a85c0200382756f4fa5a71aadb))
+* remove duplicate vpc execution permissions ([#3304](https://github.com/philips-labs/terraform-aws-github-runner/issues/3304)) ([0bebeef](https://github.com/philips-labs/terraform-aws-github-runner/commit/0bebeef094b2e64af7f81166becae6c65167df86))
+
+## [3.4.1](https://github.com/philips-labs/terraform-aws-github-runner/compare/v3.4.0...v3.4.1) (2023-05-23)
+
+
+### Bug Fixes
+
+* added additional outputs to multi runner module. ([#3283](https://github.com/philips-labs/terraform-aws-github-runner/issues/3283)) ([9644e05](https://github.com/philips-labs/terraform-aws-github-runner/commit/9644e05a2345369349ee9217da47db68860997d5))
+* **lambda:** bump @aws-sdk/client-sqs from 3.321.1 to 3.332.0 in /lambdas ([#3271](https://github.com/philips-labs/terraform-aws-github-runner/issues/3271)) ([170baa8](https://github.com/philips-labs/terraform-aws-github-runner/commit/170baa8e8799a6335f4d0f868e89a8496632aa11))
+* **lambda:** bump @aws-sdk/client-sqs from 3.332.0 to 3.337.0 in /lambdas ([#3284](https://github.com/philips-labs/terraform-aws-github-runner/issues/3284)) ([01a053e](https://github.com/philips-labs/terraform-aws-github-runner/commit/01a053ee049c7a7cd80241d10272155c1a94af88))
+* **lambda:** bump @aws-sdk/lib-storage from 3.321.1 to 3.335.0 in /lambdas ([#3281](https://github.com/philips-labs/terraform-aws-github-runner/issues/3281)) ([9387bee](https://github.com/philips-labs/terraform-aws-github-runner/commit/9387bee757d7692b33a5599a6d2868de9f2ba492))
+* **lambda:** bump @aws-sdk/lib-storage from 3.335.0 to 3.337.0 in /lambdas ([#3286](https://github.com/philips-labs/terraform-aws-github-runner/issues/3286)) ([2a447ae](https://github.com/philips-labs/terraform-aws-github-runner/commit/2a447ae43520e9fca19d103ae956d5eb44e7f21a))
+* **lambda:** bump @octokit/auth-app from 4.0.9 to 4.0.13 in /lambdas ([#3287](https://github.com/philips-labs/terraform-aws-github-runner/issues/3287)) ([517d2e0](https://github.com/philips-labs/terraform-aws-github-runner/commit/517d2e02623ec863ebeb1fae105332026a32fe9e))
+* **lambda:** bump @octokit/types from 9.2.1 to 9.2.2 in /lambdas ([#3273](https://github.com/philips-labs/terraform-aws-github-runner/issues/3273)) ([e083898](https://github.com/philips-labs/terraform-aws-github-runner/commit/e083898e4da41c0c1f180094ae132479bc155ee6))
+* **multi-runner:** allow runner_additional_security_group_ids to apply to multi_runner_config ([#3221](https://github.com/philips-labs/terraform-aws-github-runner/issues/3221)) ([5fb1fa8](https://github.com/philips-labs/terraform-aws-github-runner/commit/5fb1fa87e2cec416051c225e5b32504df1e30004))
+* **multi-runner:** enable SSE by default for runner-binaries bucket ([#3274](https://github.com/philips-labs/terraform-aws-github-runner/issues/3274)) ([5d314f2](https://github.com/philips-labs/terraform-aws-github-runner/commit/5d314f2966381f6d281ef913f601f579e627f260))
+* **webhook:** logic to find the workflow labels inside runner config supported labelsets. ([#3278](https://github.com/philips-labs/terraform-aws-github-runner/issues/3278)) ([9fcf33a](https://github.com/philips-labs/terraform-aws-github-runner/commit/9fcf33a86254cf64f115327f506c940583144ed5))
+
+## [3.4.0](https://github.com/philips-labs/terraform-aws-github-runner/compare/v3.3.0...v3.4.0) (2023-05-12)
+
+
+### Features
+
+* **runners:** allow explicitly standard or unlimited ([#3244](https://github.com/philips-labs/terraform-aws-github-runner/issues/3244)) ([e2cf7ac](https://github.com/philips-labs/terraform-aws-github-runner/commit/e2cf7ace992df354281c19f8240a97c134264758))
+
+
+### Bug Fixes
+
+* Expand repository_white_list documentation ([#3254](https://github.com/philips-labs/terraform-aws-github-runner/issues/3254)) ([5f3771a](https://github.com/philips-labs/terraform-aws-github-runner/commit/5f3771af9e81f362f598fed5178e6f029fa2aa23))
+* **lambda:** bump @octokit/types from 9.2.0 to 9.2.1 in /lambdas ([#3259](https://github.com/philips-labs/terraform-aws-github-runner/issues/3259)) ([4bb77e0](https://github.com/philips-labs/terraform-aws-github-runner/commit/4bb77e062d378d52adddeb97929166d1ba9a95c4))
+
 ## [3.3.0](https://github.com/philips-labs/terraform-aws-github-runner/compare/v3.2.0...v3.3.0) (2023-05-05)
 
 
