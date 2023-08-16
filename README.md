@@ -35,14 +35,14 @@ This [Terraform](https://www.terraform.io/) module creates the required infrastr
 - [Sub modules](#sub-modules)
 - [Logging](#logging)
 - [Debugging](#debugging)
-- [Security Consideration](#security-consideration)
+- [Security Considerations](#security-considerations)
 - [Requirements](#requirements)
 - [Providers](#providers)
 - [Modules](#modules)
 - [Resources](#resources)
 - [Inputs](#inputs)
 - [Outputs](#outputs)
-- [Contribution](#contribution)
+- [Contributing](#contributing)
 - [Philips Forest](#philips-forest)
 
 ## Motivation
@@ -66,7 +66,7 @@ In AWS an [API gateway](https://docs.aws.amazon.com/apigateway/index.html) endpo
 
 The "scale up runner" lambda listens to the SQS queue and picks up events. The lambda runs various checks to decide whether a new EC2 spot instance needs to be created. For example, the instance is not created if the build is already started by an existing runner, or the maximum number of runners is reached.
 
-The Lambda first requests a registration token from GitHub, which is needed later by the runner to register itself. This avoids the case that the EC2 instance, which later in the process will install the agent, needs administration permissions to register the runner. Next, the EC2 spot instance is created via the launch template. The launch template defines the specifications of the required instance and contains a [`user_data`](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) script. This script will install the required software and configure it. The registration token for the action runner is stored in the parameter store (SSM), from which the user data script will fetch it and delete it once it has been retrieved. Once the user data script is finished, the action runner should be online, and the workflow will start in seconds.
+The Lambda first requests a JIT configuration or registration token from GitHub, which is needed later by the runner to register itself. This avoids the case that the EC2 instance, which later in the process will install the agent, needs administration permissions to register the runner. Next, the EC2 spot instance is created via the launch template. The launch template defines the specifications of the required instance and contains a [`user_data`](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) script. This script will install the required software and configure it. The registration token for the action runner is stored in the parameter store (SSM), from which the user data script will fetch it and delete it once it has been retrieved. Once the user data script is finished, the action runner should be online, and the workflow will start in seconds.
 
 Scaling down the runners is at the moment brute-forced, every configurable amount of minutes a lambda will check every runner (instance) if it is busy. In case the runner is not busy it will be removed from GitHub and the instance terminated in AWS. At the moment there seems to be no other option to scale down more smoothly.
 
@@ -92,7 +92,7 @@ To be able to support a number of use-cases the module has quite a lot of config
 - Multi-Runner module. This modules allows you to create multiple runner configurations with a single webhook and single GitHub App to simplify deployment of different types of runners. Refer to the [ReadMe](.modules/../modules/multi-runner/README.md) for more information to understand the functionality.
 - Workflow job event. You can configure the webhook in GitHub to send workflow job events to the webhook. Workflow job events were introduced by GitHub in September 2021 and are designed to support scalable runners. We advise using the workflow job event when possible.
 - Linux vs Windows. You can configure the OS types linux and win. Linux will be used by default.
-- Re-use vs Ephemeral. By default runners are re-used, until detected idle. Once idle they will be removed from the pool. To improve security we are introducing ephemeral runners. Those runners are only used for one job. Ephemeral runners are only working in combination with the workflow job event. We also suggest using a pre-build AMI to improve the start time of jobs.
+- Re-use vs Ephemeral. By default runners are re-used, until detected idle. Once idle they will be removed from the pool. To improve security we are introducing ephemeral runners. Those runners are only used for one job. Ephemeral runners are only working in combination with the workflow job event. For ephemeral runners the lambda requests a JIT (just in time) configuration via the GitHub API to register the runner. [JIT configuration](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-just-in-time-runners) is limited to ephemeral runners (and currently not supported by GHES). For non-ephemeral a registration token is requested always. In both cases the configuration is made available to the instance via the same SSM parameter. To disable JIT configuration for ephermeral runners set `enable_jit_config` to `false`. We also suggest using a pre-build AMI to improve the start time of jobs for ephemeral runners.
 - GitHub Cloud vs GitHub Enterprise Server (GHES). The runners support GitHub Cloud as well GitHub Enterprise Server. For GHES we rely on our community for support and testing. We have no possibility to test ourselves on GHES.
 - Spot vs on-demand. The runners use either the EC2 spot or on-demand life cycle. Runners will be created via the AWS [CreateFleet API](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateFleet.html). The module (scale up lambda) will request via the CreateFleet API to create instances in one of the subnets and of the specified instance types.
 - ARM64 support via Graviton/Graviton2 instance-types. When using the default example or top-level module, specifying `instance_types` that match a Graviton/Graviton 2 (ARM64) architecture (e.g. a1, t4g or any 6th-gen `g` or `gd` type), you must also specify `runner_architecture = "arm64"` and the sub-modules will be automatically configured to provision with ARM64 AMIs and leverage GitHub's ARM64 action runner. See below for more details.
@@ -105,7 +105,7 @@ The module uses the AWS System Manager Parameter Store to store configuration fo
 | ----------- | ----------- |
 | `ssm_paths.root/var.prefix?/app/`     | App secrets used by Lambda's       |
 | `ssm_paths.root/var.prefix?/runners/config/<name>`     | Configuration parameters used by runner start script       |
-| `ssm_paths.root/var.prefix?/runners/tokens/<ec2-instance-id>` | Registration tokens for the runners generated by the scale-up lambda, consumed by the start script on the runner.       |
+| `ssm_paths.root/var.prefix?/runners/tokens/<ec2-instance-id>` | Either JIT configuration (ephemeral runners) or registration tokens (non ephemeral runners) generated by the control plane (scale-up lambda), and consumed by the start script on the runner to activate / register the runner.
 
 Available configuration parameters:
 
@@ -292,11 +292,15 @@ The pool is NOT enabled by default and can be enabled by setting at least one ob
 
 The module will scale down to zero runners by default. By specifying a `idle_config` config, idle runners can be kept active. The scale down lambda checks if any of the cron expressions matches the current time with a margin of 5 seconds. When there is a match, the number of runners specified in the idle config will be kept active. In case multiple cron expressions matches, only the first one is taken into account. Below is an idle configuration for keeping runners active from 9:00am to 5:59pm on working days. The [cron expression generator by Cronhub](https://crontab.cronhub.io/) is a great resource to set up your idle config.
 
+By default, the oldest instances are evicted. This helps keep your environment up-to-date and reduce problems like running out of disk space or RAM. Alternatively, if your older instances have a long-living cache, you can override the `evictionStrategy` to `newest_first` to evict the newest instances first instead.
+
 ```hcl
 idle_config = [{
-   cron      = "* * 9-17 * * 1-5"
-   timeZone  = "Europe/Amsterdam"
-   idleCount = 2
+   cron             = "* * 9-17 * * 1-5"
+   timeZone         = "Europe/Amsterdam"
+   idleCount        = 2
+   # Defaults to 'oldest_first'
+   evictionStrategy = "oldest_first"
 }]
 ```
 
@@ -330,7 +334,7 @@ You can configure runners to be ephemeral, runners will be used only for one job
 - All events in the queue will lead to a new runner created by the lambda. By setting `enable_job_queued_check` to `true` you can enforce a rule of only creating a runner if the event has a correlated queued job. Setting this can avoid creating useless runners, for example when jobs got cancelled before a runner was created or if the job was already picked up by another runner. We suggest using this in combination with a pool.
 - To ensure runners are created in the same order GitHub sends the events, by default we use a FIFO queue. This is mainly relevant for repo level runners. For ephemeral runners you can set `enable_fifo_build_queue` to `false`.
 - Errors related to scaling should be retried via SQS. You can configure `job_queue_retention_in_seconds` and `redrive_build_queue` to tune the behavior. We have no mechanism to avoid events never being processed, which means potentially no runner gets created and the job in GitHub times out in 6 hours.
- 
+
 The example for [ephemeral runners](./examples/ephemeral) is based on the [default example](./examples/default). Have look at the diff to see the major configuration differences.
 
 ### Prebuilt Images
@@ -438,7 +442,9 @@ In case the setup does not work as intended follow the trace of events:
 
 ## Security Considerations
 
-This module creates resources in your AWS infrastructure, and EC2 instances for hosting the self-hosted runners on-demand. IAM permissions are set to a minimal level, and could be further limited by using permission boundaries. Instances permissions are limited to retrieve and delete the registration token, access the instance's own tags, and terminate the instance itself.
+This module creates resources in your AWS infrastructure, and EC2 instances for hosting the self-hosted runners on-demand. IAM permissions are set to a minimal level, and could be further limited by using permission boundaries. Instances permissions are limited to retrieve and delete the registration token, access the instance's own tags, and terminate the instance itself. By nature instances are short-lived, we strongly suggest to use ephemeral runners to ensure a safe build environment for each workflow job execution.
+
+Ephemeral runners are using the JIT configuration, confguration that only can be used once to activate a runner. For non-ephemeral runners this option is not provided by GitHub. For non-ephemeeral runners a registration token is passed via SSM. After using the token, the token is deleted. But the token remains valid and is potential available in memory on the runner. For ephemeral runners this problem is avoid by using just in time tokens.
 
 The examples are using standard AMI's for different operation systems. Instances are not hardened, and sudo operation are not blocked. To provide an out of the box working experience by default the module installs and configures the runner. However secrets are not hard coded, they finally end up in the memory of the instances. You can harden the instance by providing your own AMI and overwriting the cloud-init script.
 
@@ -486,7 +492,7 @@ We welcome any improvement to the standard module to make the default as secure 
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_ami_filter"></a> [ami\_filter](#input\_ami\_filter) | List of maps used to create the AMI filter for the action runner AMI. By default amazon linux 2 is used. | `map(list(string))` | `null` | no |
+| <a name="input_ami_filter"></a> [ami\_filter](#input\_ami\_filter) | Map of lists used to create the AMI filter for the action runner AMI. | `map(list(string))` | <pre>{<br>  "state": [<br>    "available"<br>  ]<br>}</pre> | no |
 | <a name="input_ami_id_ssm_parameter_name"></a> [ami\_id\_ssm\_parameter\_name](#input\_ami\_id\_ssm\_parameter\_name) | Externally managed SSM parameter (of data type aws:ec2:image) that contains the AMI ID to launch runner instances from. Overrides ami\_filter | `string` | `null` | no |
 | <a name="input_ami_kms_key_arn"></a> [ami\_kms\_key\_arn](#input\_ami\_kms\_key\_arn) | Optional CMK Key ARN to be used to launch an instance from a shared encrypted AMI | `string` | `null` | no |
 | <a name="input_ami_owners"></a> [ami\_owners](#input\_ami\_owners) | The list of owners used to select the AMI of action runner instances. | `list(string)` | <pre>[<br>  "amazon"<br>]</pre> | no |
@@ -502,6 +508,7 @@ We welcome any improvement to the standard module to make the default as secure 
 | <a name="input_enable_ephemeral_runners"></a> [enable\_ephemeral\_runners](#input\_enable\_ephemeral\_runners) | Enable ephemeral runners, runners will only be used once. | `bool` | `false` | no |
 | <a name="input_enable_event_rule_binaries_syncer"></a> [enable\_event\_rule\_binaries\_syncer](#input\_enable\_event\_rule\_binaries\_syncer) | Option to disable EventBridge Lambda trigger for the binary syncer, useful to stop automatic updates of binary distribution. | `bool` | `true` | no |
 | <a name="input_enable_fifo_build_queue"></a> [enable\_fifo\_build\_queue](#input\_enable\_fifo\_build\_queue) | Enable a FIFO queue to keep the order of events received by the webhook. Recommended for repo level runners. | `bool` | `false` | no |
+| <a name="input_enable_jit_config"></a> [enable\_jit\_config](#input\_enable\_jit\_config) | Overwrite the default behavior for JIT configuration. By default JIT configuration is enabled for ephemeral runners and disabled for non-ephemeral runners. In case of GHES check first if the JIT config API is avaialbe. In case you upgradeing from 3.x to 4.x you can set `enable_jit_config` to `false` to avoid a breaking change when having your own AMI. | `bool` | `null` | no |
 | <a name="input_enable_job_queued_check"></a> [enable\_job\_queued\_check](#input\_enable\_job\_queued\_check) | Only scale if the job event received by the scale up lambda is in the queued state. By default enabled for non ephemeral runners and disabled for ephemeral. Set this variable to overwrite the default behavior. | `bool` | `null` | no |
 | <a name="input_enable_managed_runner_security_group"></a> [enable\_managed\_runner\_security\_group](#input\_enable\_managed\_runner\_security\_group) | Enables creation of the default managed security group. Unmanaged security groups can be specified via `runner_additional_security_group_ids`. | `bool` | `true` | no |
 | <a name="input_enable_organization_runners"></a> [enable\_organization\_runners](#input\_enable\_organization\_runners) | Register runners to organization, instead of repo level | `bool` | `false` | no |
@@ -518,7 +525,7 @@ We welcome any improvement to the standard module to make the default as secure 
 | <a name="input_ghes_ssl_verify"></a> [ghes\_ssl\_verify](#input\_ghes\_ssl\_verify) | GitHub Enterprise SSL verification. Set to 'false' when custom certificate (chains) is used for GitHub Enterprise Server (insecure). | `bool` | `true` | no |
 | <a name="input_ghes_url"></a> [ghes\_url](#input\_ghes\_url) | GitHub Enterprise Server URL. Example: https://github.internal.co - DO NOT SET IF USING PUBLIC GITHUB | `string` | `null` | no |
 | <a name="input_github_app"></a> [github\_app](#input\_github\_app) | GitHub app parameters, see your github app. Ensure the key is the base64-encoded `.pem` file (the output of `base64 app.private-key.pem`, not the content of `private-key.pem`). | <pre>object({<br>    key_base64     = string<br>    id             = string<br>    webhook_secret = string<br>  })</pre> | n/a | yes |
-| <a name="input_idle_config"></a> [idle\_config](#input\_idle\_config) | List of time periods, defined as a cron expression, to keep a minimum amount of runners active instead of scaling down to 0. By defining this list you can ensure that in time periods that match the cron expression within 5 seconds a runner is kept idle. | <pre>list(object({<br>    cron      = string<br>    timeZone  = string<br>    idleCount = number<br>  }))</pre> | `[]` | no |
+| <a name="input_idle_config"></a> [idle\_config](#input\_idle\_config) | List of time periods, defined as a cron expression, to keep a minimum amount of runners active instead of scaling down to 0. By defining this list you can ensure that in time periods that match the cron expression within 5 seconds a runner is kept idle. | <pre>list(object({<br>    cron             = string<br>    timeZone         = string<br>    idleCount        = number<br>    evictionStrategy = optional(string, "oldest_first")<br>  }))</pre> | `[]` | no |
 | <a name="input_instance_allocation_strategy"></a> [instance\_allocation\_strategy](#input\_instance\_allocation\_strategy) | The allocation strategy for spot instances. AWS recommends using `price-capacity-optimized` however the AWS default is `lowest-price`. | `string` | `"lowest-price"` | no |
 | <a name="input_instance_max_spot_price"></a> [instance\_max\_spot\_price](#input\_instance\_max\_spot\_price) | Max price price for spot instances per hour. This variable will be passed to the create fleet as max spot price for the fleet. | `string` | `null` | no |
 | <a name="input_instance_profile_path"></a> [instance\_profile\_path](#input\_instance\_profile\_path) | The path that will be added to the instance\_profile, if not set the environment name will be used. | `string` | `null` | no |

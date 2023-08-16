@@ -8,7 +8,7 @@ import {
   TerminateInstancesCommand,
 } from '@aws-sdk/client-ec2';
 import { createChildLogger } from '@terraform-aws-github-runner/aws-powertools-util';
-import { getParameter, putParameter } from '@terraform-aws-github-runner/aws-ssm-util';
+import { getParameter } from '@terraform-aws-github-runner/aws-ssm-util';
 import moment from 'moment';
 
 import ScaleError from './../scale-runners/ScaleError';
@@ -116,24 +116,11 @@ function generateFleetOverrides(
   return result;
 }
 
-function removeTokenForLogging(config: string[]): string[] {
-  const result: string[] = [];
-  config.forEach((e) => {
-    if (e.startsWith('--token')) {
-      result.push('--token <REDACTED>');
-    } else {
-      result.push(e);
-    }
-  });
-  return result;
-}
-
-export async function createRunner(runnerParameters: Runners.RunnerInputParameters): Promise<void> {
+export async function createRunner(runnerParameters: Runners.RunnerInputParameters): Promise<string[]> {
   logger.debug('Runner configuration.', {
     runner: {
       configuration: {
         ...runnerParameters,
-        runnerServiceConfig: removeTokenForLogging(runnerParameters.runnerServiceConfig),
       },
     },
   });
@@ -157,6 +144,12 @@ export async function createRunner(runnerParameters: Runners.RunnerInputParamete
   }
 
   const numberOfRunners = runnerParameters.numberOfRunners ? runnerParameters.numberOfRunners : 1;
+  const tags = [
+    { Key: 'ghr:Application', Value: 'github-action-runner' },
+    { Key: 'ghr:created_by', Value: numberOfRunners === 1 ? 'scale-up-lambda' : 'pool-lambda' },
+    { Key: 'Type', Value: runnerParameters.runnerType },
+    { Key: 'Owner', Value: runnerParameters.runnerOwner },
+  ];
 
   let fleet: CreateFleetResult;
   try {
@@ -186,12 +179,11 @@ export async function createRunner(runnerParameters: Runners.RunnerInputParamete
       TagSpecifications: [
         {
           ResourceType: 'instance',
-          Tags: [
-            { Key: 'ghr:Application', Value: 'github-action-runner' },
-            { Key: 'ghr:created_by', Value: numberOfRunners === 1 ? 'scale-up-lambda' : 'pool-lambda' },
-            { Key: 'Type', Value: runnerParameters.runnerType },
-            { Key: 'Owner', Value: runnerParameters.runnerOwner },
-          ],
+          Tags: tags,
+        },
+        {
+          ResourceType: 'volume',
+          Tags: tags,
         },
       ],
       Type: 'instant',
@@ -233,22 +225,7 @@ export async function createRunner(runnerParameters: Runners.RunnerInputParamete
 
   logger.info(`Created instance(s): ${instances.join(',')}`);
 
-  const delay = async (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-  const ssmParameterStoreMaxThroughput = 40;
-  const isDelay = instances.length >= ssmParameterStoreMaxThroughput ? true : false;
-
-  for (const instance of instances) {
-    await putParameter(
-      `${runnerParameters.ssmTokenPath}/${instance}`,
-      runnerParameters.runnerServiceConfig.join(' '),
-      true,
-    );
-
-    if (isDelay) {
-      // Delay to prevent AWS ssm rate limits by being within the max throughput limit
-      await delay(25);
-    }
-  }
+  return instances;
 }
 
 // If launchTime is undefined, this will return false
