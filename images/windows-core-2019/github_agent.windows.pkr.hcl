@@ -70,7 +70,7 @@ source "amazon-ebs" "githubrunner" {
 
   source_ami_filter {
     filters = {
-      name                = "Windows_Server-2019-English-Core-ContainersLatest-*"
+      name                = "Windows_Server-2019-English-Core-Base-2023.08.10"
       root-device-type    = "ebs"
       virtualization-type = "hvm"
     }
