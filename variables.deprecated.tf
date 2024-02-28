@@ -1,43 +1,20 @@
-variable "enabled_userdata" {
-  description = "DEPCRECATED: Replaced by `enable_userdata`."
+variable "lambda_tracing_mode" {
+  description = "DEPRECATED: Replaced by `tracing_config`."
   type        = string
   default     = null
 
   validation {
-    condition     = anytrue([var.enabled_userdata == null])
-    error_message = "DEPCRECATED, replaced by `enable_userdata`."
+    condition     = anytrue([var.lambda_tracing_mode == null])
+    error_message = "DEPRECATED, Replaced by `tracing_config`."
   }
 }
 
-variable "runner_enable_workflow_job_labels_check_all" {
-  description = "DEPCRECATED: Replaced by `enable_runner_workflow_job_labels_check_all`."
-  type        = string
+variable "enable_event_rule_binaries_syncer" {
+  description = "DEPRECATED: Replaced by `state_event_rule_binaries_syncer`."
+  type        = bool
   default     = null
-
   validation {
-    condition     = anytrue([var.runner_enable_workflow_job_labels_check_all == null])
-    error_message = "DEPCRECATED, replaced by `enable_runner_workflow_job_labels_check_all`."
-  }
-}
-
-variable "fifo_build_queue" {
-  description = "DEPCRECATED: Replaced by `enable_fifo_build_queue`."
-  type        = string
-  default     = null
-
-  validation {
-    condition     = anytrue([var.fifo_build_queue == null])
-    error_message = "DEPCRECATED, replaced by `enable_fifo_build_queue`."
-  }
-}
-
-variable "enable_enable_fifo_build_queue" {
-  description = "DEPCRECATED: Replaced by `enable_fifo_build_queue` / `fifo_build_queue`."
-  type        = string
-  default     = null
-
-  validation {
-    condition     = anytrue([var.enable_enable_fifo_build_queue == null])
-    error_message = "DEPCRECATED, replaced by `enable_fifo_build_queue`."
+    condition     = var.enable_event_rule_binaries_syncer == null
+    error_message = "DEPRECATED, Replaced by `state_event_rule_binaries_syncer`."
   }
 }
