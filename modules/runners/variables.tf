@@ -288,7 +288,7 @@ variable "runner_run_as" {
 }
 
 variable "runners_maximum_count" {
-  description = "The maximum number of runners that will be created."
+  description = "The maximum number of runners that will be created. Setting the variable to `-1` desiables the maximum check."
   type        = number
   default     = 3
 }
@@ -660,4 +660,10 @@ variable "enable_on_demand_failover_for_errors" {
   description = "Enable on-demand failover. For example to fall back to on demand when no spot capacity is available the variable can be set to `InsufficientInstanceCapacity`. When not defined the default behavior is to retry later."
   type        = list(string)
   default     = []
+}
+
+variable "lambda_tags" {
+  description = "Map of tags that will be added to all the lambda function resources. Note these are additional tags to the default tags."
+  type        = map(string)
+  default     = {}
 }
