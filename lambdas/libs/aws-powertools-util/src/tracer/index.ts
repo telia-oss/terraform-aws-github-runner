@@ -1,5 +1,4 @@
-import { Tracer } from '@aws-lambda-powertools/tracer';
-import { captureLambdaHandler } from '@aws-lambda-powertools/tracer/middleware';
+import { Tracer, captureLambdaHandler } from '@aws-lambda-powertools/tracer';
 
 const tracer = new Tracer();
 

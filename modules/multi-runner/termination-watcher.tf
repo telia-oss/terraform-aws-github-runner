@@ -16,7 +16,6 @@ locals {
     metrics_namespace         = var.metrics_namespace
     s3_bucket                 = var.lambda_s3_bucket
     tracing_config            = var.tracing_config
-    lambda_tags               = var.lambda_tags
   }
 }
 

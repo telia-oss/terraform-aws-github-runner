@@ -37,7 +37,7 @@ resource "aws_lambda_function" "ami_housekeeper" {
     }
   }
 
-  tags = merge(var.tags, var.lambda_tags)
+  tags = var.tags
 
   dynamic "tracing_config" {
     for_each = var.tracing_config.mode != null ? [true] : []

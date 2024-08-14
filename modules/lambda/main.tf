@@ -42,7 +42,7 @@ resource "aws_lambda_function" "main" {
     }
   }
 
-  tags = merge(var.lambda.tags, var.lambda.lambda_tags)
+  tags = var.lambda.tags
 
   dynamic "tracing_config" {
     for_each = var.lambda.tracing_config.mode != null ? [true] : []
