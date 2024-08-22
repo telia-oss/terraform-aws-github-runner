@@ -480,7 +480,7 @@ variable "instance_target_capacity_type" {
 variable "instance_allocation_strategy" {
   description = "The allocation strategy for spot instances. AWS recommends using `price-capacity-optimized` however the AWS default is `lowest-price`."
   type        = string
-  default     = "lowest-price"
+  default     = "price-capacity-optimized"
   validation {
     condition     = contains(["lowest-price", "diversified", "capacity-optimized", "capacity-optimized-prioritized", "price-capacity-optimized"], var.instance_allocation_strategy)
     error_message = "The instance allocation strategy does not match the allowed values."
