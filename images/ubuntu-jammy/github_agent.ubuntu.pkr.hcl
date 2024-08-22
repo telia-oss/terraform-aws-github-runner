@@ -162,7 +162,7 @@ build {
       "unzip awscliv2.zip",
       "sudo ./aws/install",
       "sudo echo 'APT::Periodic::Update-Package-Lists "0";' > /etc/apt/apt.conf.d/20auto-upgrades",
-      "sudo echo 'APT::Periodic::Unattended-Upgrade "0";' >> /etc/apt/apt.conf.d/20auto-upgrades"
+      "sudo echo 'APT::Periodic::Unattended-Upgrade "0";' >> /etc/apt/apt.conf.d/20auto-upgrades",
     ], var.custom_shell_commands)
   }
 
