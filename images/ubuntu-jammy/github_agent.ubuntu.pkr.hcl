@@ -161,8 +161,8 @@ build {
       "sudo curl -f https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip",
       "unzip awscliv2.zip",
       "sudo ./aws/install",
-      "echo 'APT::Periodic::Update-Package-Lists "0";' | sudo tee /etc/apt/apt.conf.d/20auto-upgrades > /dev/null",
-      "echo 'APT::Periodic::Unattended-Upgrade  "0";' | sudo tee /etc/apt/apt.conf.d/20auto-upgrades > /dev/null"
+      "echo 'APT::Periodic::Update-Package-Lists \"0\";' | sudo tee /etc/apt/apt.conf.d/20auto-upgrades > /dev/null", 
+      "echo 'APT::Periodic::Unattended-Upgrade \"0\";' | sudo tee /etc/apt/apt.conf.d/20auto-upgrades > /dev/null"
     ], var.custom_shell_commands)
   }
 
