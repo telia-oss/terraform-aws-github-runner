@@ -2,8 +2,8 @@ name: Update docs
 on:
   push:
     paths:
-      - "*.tf"
-      - "*.md"
+      - "**/*.tf"
+      - "**/*.md"
       - ".github/workflows/update-docs.yml"
 
 permissions:
@@ -12,42 +12,65 @@ permissions:
 
 jobs:
   docs:
-    # update docs after merge back to develop
     name: Auto update terraform docs
     runs-on: ubuntu-latest
     steps:
-      - name: Get installation token
-        uses: philips-software/app-token-action@a37926571e4cec6f219e06727136efdd073d8657 # ratchet:philips-software/app-token-action@v1.1.2
-        id: token
+      - name: Checkout with GITHUB Action token
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
         with:
-          app_id: ${{ secrets.FOREST_RELEASER_APP_ID }}
-          app_base64_private_key: ${{ secrets.FOREST_RELEASER_APP_PRIVATE_KEY_BASE64 }}
-          auth_type: installation
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      # We use the app for branches in this this repo to ensure PR chekcs are kept in place.
-      - if: github.event_name == 'push' && github.repository_owner == 'philips-labs' && github.ref != 'refs/heads/main'
-        name: Checkout with App Token
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # ratchet:actions/checkout@v3
-        with:
-          token: ${{ steps.token.outputs.token }}
-
-      - if: (github.event_name == 'push' && github.repository_owner != 'philips-labs') || github.ref == 'refs/heads/main'
-        name: Checkout with GITHUB Action token
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # ratchet:actions/checkout@v3
-
+      # use an app to ensure CI is triggered
       - name: Generate TF docs
-        uses: terraform-docs/gh-actions@f6d59f89a280fa0a3febf55ef68f146784b20ba0 # ratchet:terraform-docs/gh-actions@v1.0.0
+        if: github.repository_owner == 'philips-labs'
+        uses: terraform-docs/gh-actions@aeae0038ed47a547e0c0fca5c059d3335f48fb25 # v1.3.0
         with:
           find-dir: .
           git-commit-message: "docs: auto update terraform docs"
-          git-push: ${{ github.ref != 'refs/heads/main' }}
+          git-push: ${{ github.ref != 'refs/heads/main' || github.repository_owner != 'philips-labs' }}
+          git-push-user-name: philips-labs-pr|bot
+          git-push-user-email: "philips-labs-pr[bot]@users.noreply.github.com"
 
-      - name: Create Pull Request (main branch only)
-        if: github.ref == 'refs/heads/main'
-        uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38 # ratchet:peter-evans/create-pull-request@v5.0.2
+      - name: Generate TF docs (forks)
+        if: github.repository_owner != 'philips-labs'
+        uses: terraform-docs/gh-actions@aeae0038ed47a547e0c0fca5c059d3335f48fb25 # v1.3.0
         with:
-          token: ${{ steps.token.outputs.token || secrets.GITHUB_TOKEN }}
-          commit-message: "Update Terraform docs"
+          find-dir: .
+          git-commit-message: "docs: auto update terraform docs"
+          git-push: ${{ github.ref != 'refs/heads/main' || github.repository_owner != 'philips-labs' }}
+
+      # change docs via PR in case of locked main branch
+      - name: Create Pull Request (main branch only)
+        if: github.ref == 'refs/heads/main' && github.repository_owner == 'philips-labs'
+        uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "docs: auto update terraform docs"
           title: "docs: Update Terraform docs"
-          branch: ${{ github.event.pull_request.base.ref }}-update-docs
+          branch: update-docs
+          branch-suffix: random
           base: ${{ github.event.pull_request.base.ref }}
+          delete-branch: true
+
+  deploy-pages:
+    needs: [docs]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      - name: Configure Git Credentials
+        run: |
+          git config user.name github-actions[bot]
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      - uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3 # v5.2.0
+        with:
+          python-version: 3.x
+      - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
+      - uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+        with:
+          key: mkdocs-material-${{ env.cache_id }}
+          path: .cache
+          restore-keys: |
+            mkdocs-material-
+      - run: pip install mkdocs-material
+      - run: pip install mkdocs-material-extensions
+      - run: mkdocs gh-deploy --force -c -b gh-pages

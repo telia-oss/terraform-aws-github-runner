@@ -71,7 +71,6 @@ Before you submit your pull request consider the following guidelines:
         terraform init
         ```
 
-* For updating docs, you have to enable GitHub actions on your forked repository. Simply go to the tab Actions and enable actions.
 * Commit your changes using a descriptive commit message:
 
     ```shell
@@ -157,4 +156,4 @@ Use the badge to sign-up.
 
 [contribute]: CONTRIBUTING.md
 [github]: https://github.com/philips-labs/terraform-aws-github-runner/issues
-[slack]: https://philips-software.slack.com/home
+[slack]: https://join.slack.com/t/philips-software/shared_invite/zt-xecw65v5-i1531hGP~mdVwgxLFx7ckg
