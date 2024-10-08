@@ -46,7 +46,7 @@ resource "aws_lambda_function" "syncer" {
     }
   }
 
-  tags = merge(var.tags, var.lambda_tags)
+  tags = var.tags
 
   dynamic "tracing_config" {
     for_each = var.tracing_config.mode != null ? [true] : []

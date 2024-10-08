@@ -1,5 +1,6 @@
 # Changelog
 
+<<<<<<< HEAD
 ## [5.16.2](https://github.com/philips-labs/terraform-aws-github-runner/compare/v5.16.1...v5.16.2) (2024-10-04)
 
 
@@ -215,6 +216,8 @@
 * **lambda:** bump the aws group in /lambdas with 5 updates ([#3846](https://github.com/philips-labs/terraform-aws-github-runner/issues/3846)) ([9303a10](https://github.com/philips-labs/terraform-aws-github-runner/commit/9303a108dfd12ff0c63e7aeb55aa814c7f14619c))
 * **lambda:** bump the aws group in /lambdas with 6 updates ([#3818](https://github.com/philips-labs/terraform-aws-github-runner/issues/3818)) ([9a9031e](https://github.com/philips-labs/terraform-aws-github-runner/commit/9a9031ead20546f6a3b939435a801e5aeb8264b8))
 
+=======
+>>>>>>> main
 ## [5.9.0](https://github.com/philips-labs/terraform-aws-github-runner/compare/v5.8.0...v5.9.0) (2024-03-14)
 
 

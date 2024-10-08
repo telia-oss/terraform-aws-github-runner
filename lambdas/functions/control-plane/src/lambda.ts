@@ -25,7 +25,7 @@ export async function scaleUpHandler(event: SQSEvent, context: Context): Promise
     if (e instanceof ScaleError) {
       throw e;
     } else {
-      logger.warn(`Ignoring error: ${e}`);
+      logger.warn(`Ignoring error: ${(e as Error).message}`);
     }
   }
 }

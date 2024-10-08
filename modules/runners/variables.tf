@@ -289,7 +289,7 @@ variable "runner_run_as" {
 }
 
 variable "runners_maximum_count" {
-  description = "The maximum number of runners that will be created. Setting the variable to `-1` desiables the maximum check."
+  description = "The maximum number of runners that will be created."
   type        = number
   default     = 3
 }
@@ -663,6 +663,7 @@ variable "enable_on_demand_failover_for_errors" {
   type        = list(string)
   default     = []
 }
+<<<<<<< HEAD
 
 variable "lambda_tags" {
   description = "Map of tags that will be added to all the lambda function resources. Note these are additional tags to the default tags."
@@ -715,3 +716,5 @@ variable "job_retry" {
     error_message = "The maxium message delay for SWS is 900 seconds."
   }
 }
+=======
+>>>>>>> main

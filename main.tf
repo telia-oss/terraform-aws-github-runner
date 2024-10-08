@@ -142,8 +142,7 @@ module "webhook" {
       }
     }
   }
-  matcher_config_parameter_store_tier = var.matcher_config_parameter_store_tier
-  sqs_workflow_job_queue              = length(aws_sqs_queue.webhook_events_workflow_job_queue) > 0 ? aws_sqs_queue.webhook_events_workflow_job_queue[0] : null
+  sqs_workflow_job_queue = length(aws_sqs_queue.webhook_events_workflow_job_queue) > 0 ? aws_sqs_queue.webhook_events_workflow_job_queue[0] : null
 
   github_app_parameters = {
     webhook_secret = module.ssm.parameters.github_app_webhook_secret
@@ -158,7 +157,6 @@ module "webhook" {
   lambda_zip                                    = var.webhook_lambda_zip
   lambda_memory_size                            = var.webhook_lambda_memory_size
   lambda_timeout                                = var.webhook_lambda_timeout
-  lambda_tags                                   = var.lambda_tags
   tracing_config                                = var.tracing_config
   logging_retention_in_days                     = var.logging_retention_in_days
   logging_kms_key_id                            = var.logging_kms_key_id
@@ -246,7 +244,6 @@ module "runners" {
   lambda_timeout_scale_down        = var.runners_scale_down_lambda_timeout
   lambda_subnet_ids                = var.lambda_subnet_ids
   lambda_security_group_ids        = var.lambda_security_group_ids
-  lambda_tags                      = var.lambda_tags
   tracing_config                   = var.tracing_config
   logging_retention_in_days        = var.logging_retention_in_days
   logging_kms_key_id               = var.logging_kms_key_id
@@ -291,11 +288,14 @@ module "runners" {
   pool_lambda_reserved_concurrent_executions = var.pool_lambda_reserved_concurrent_executions
 
   ssm_housekeeper = var.runners_ssm_housekeeper
+<<<<<<< HEAD
   ebs_optimized   = var.runners_ebs_optimized
 
   metrics = var.metrics
 
   job_retry = var.job_retry
+=======
+>>>>>>> main
 }
 
 module "runner_binaries" {
@@ -321,7 +321,6 @@ module "runner_binaries" {
   lambda_zip                      = var.runner_binaries_syncer_lambda_zip
   lambda_memory_size              = var.runner_binaries_syncer_lambda_memory_size
   lambda_timeout                  = var.runner_binaries_syncer_lambda_timeout
-  lambda_tags                     = var.lambda_tags
   tracing_config                  = var.tracing_config
   logging_retention_in_days       = var.logging_retention_in_days
   logging_kms_key_id              = var.logging_kms_key_id
@@ -361,7 +360,6 @@ module "ami_housekeeper" {
   lambda_security_group_ids = var.lambda_security_group_ids
   lambda_subnet_ids         = var.lambda_subnet_ids
   lambda_timeout            = var.ami_housekeeper_lambda_timeout
-  lambda_tags               = var.lambda_tags
   tracing_config            = var.tracing_config
 
   logging_retention_in_days = var.logging_retention_in_days
@@ -385,7 +383,6 @@ locals {
     runtime                   = var.lambda_runtime
     security_group_ids        = var.lambda_security_group_ids
     subnet_ids                = var.lambda_subnet_ids
-    lambda_tags               = var.lambda_tags
     log_level                 = var.log_level
     logging_kms_key_id        = var.logging_kms_key_id
     logging_retention_in_days = var.logging_retention_in_days

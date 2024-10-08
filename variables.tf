@@ -480,7 +480,7 @@ variable "instance_target_capacity_type" {
 variable "instance_allocation_strategy" {
   description = "The allocation strategy for spot instances. AWS recommends using `price-capacity-optimized` however the AWS default is `lowest-price`."
   type        = string
-  default     = "lowest-price"
+  default     = "price-capacity-optimized"
   validation {
     condition     = contains(["lowest-price", "diversified", "capacity-optimized", "capacity-optimized-prioritized", "price-capacity-optimized"], var.instance_allocation_strategy)
     error_message = "The instance allocation strategy does not match the allowed values."
@@ -565,15 +565,6 @@ variable "enable_runner_workflow_job_labels_check_all" {
   default     = true
 }
 
-variable "matcher_config_parameter_store_tier" {
-  description = "The tier of the parameter store for the matcher configuration. Valid values are `Standard`, and `Advanced`."
-  type        = string
-  default     = "Standard"
-  validation {
-    condition     = contains(["Standard", "Advanced"], var.matcher_config_parameter_store_tier)
-    error_message = "`matcher_config_parameter_store_tier` value is not valid, valid values are: `Standard`, and `Advanced`."
-  }
-}
 variable "runner_ec2_tags" {
   description = "Map of tags that will be added to the launch template instance tag specifications."
   type        = map(string)
@@ -881,6 +872,10 @@ variable "instance_termination_watcher" {
     Configuration for the instance termination watcher. This feature is Beta, changes will not trigger a major release as long in beta.
 
     `enable`: Enable or disable the spot termination watcher.
+<<<<<<< HEAD
+=======
+    'enable_metrics': Enable or disable the metrics for the spot termination watcher.
+>>>>>>> main
     `memory_size`: Memory size linit in MB of the lambda.
     `s3_key`: S3 key for syncer lambda function. Required if using S3 bucket to specify lambdas.
     `s3_object_version`: S3 object version for syncer lambda function. Useful if S3 versioning is enabled on source bucket.
@@ -904,6 +899,7 @@ variable "instance_termination_watcher" {
     error_message = "The variable `instance_termination_watcher.enable_metric` is deprecated, use `metrics` instead."
   }
 }
+<<<<<<< HEAD
 
 variable "runners_ebs_optimized" {
   description = "Enable EBS optimization for the runner instances."
@@ -939,3 +935,5 @@ variable "job_retry" {
   })
   default = {}
 }
+=======
+>>>>>>> main

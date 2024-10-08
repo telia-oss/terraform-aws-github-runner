@@ -15,8 +15,11 @@ locals {
     role_permissions_boundary = var.role_permissions_boundary
     s3_bucket                 = var.lambda_s3_bucket
     tracing_config            = var.tracing_config
+<<<<<<< HEAD
     lambda_tags               = var.lambda_tags
     metrics                   = var.metrics
+=======
+>>>>>>> main
   }
 }
 

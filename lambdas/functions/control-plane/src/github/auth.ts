@@ -10,6 +10,7 @@ import {
 import { OctokitOptions } from '@octokit/core/dist-types/types';
 import { request } from '@octokit/request';
 import { Octokit } from '@octokit/rest';
+<<<<<<< HEAD:lambdas/functions/control-plane/src/github/auth.ts
 import { throttling } from '@octokit/plugin-throttling';
 import { createChildLogger } from '@aws-github-runner/aws-powertools-util';
 import { getParameter } from '@aws-github-runner/aws-ssm-util';
@@ -19,6 +20,15 @@ const logger = createChildLogger('gh-auth');
 
 export async function createOctokitClient(token: string, ghesApiUrl = ''): Promise<Octokit> {
   const CustomOctokit = Octokit.plugin(throttling);
+=======
+import { createChildLogger } from '@terraform-aws-github-runner/aws-powertools-util';
+import { getParameter } from '@terraform-aws-github-runner/aws-ssm-util';
+
+import { axiosFetch } from '../axios/fetch-override';
+
+const logger = createChildLogger('gh-auth');
+export async function createOctoClient(token: string, ghesApiUrl = ''): Promise<Octokit> {
+>>>>>>> main:lambdas/functions/control-plane/src/gh-auth/gh-auth.ts
   const ocktokitOptions: OctokitOptions = {
     auth: token,
   };
@@ -26,6 +36,7 @@ export async function createOctokitClient(token: string, ghesApiUrl = ''): Promi
     ocktokitOptions.baseUrl = ghesApiUrl;
     ocktokitOptions.previews = ['antiope'];
   }
+<<<<<<< HEAD:lambdas/functions/control-plane/src/github/auth.ts
 
   return new CustomOctokit({
     ...ocktokitOptions,
@@ -40,6 +51,9 @@ export async function createOctokitClient(token: string, ghesApiUrl = ''): Promi
       },
     },
   });
+=======
+  return new Octokit(ocktokitOptions);
+>>>>>>> main:lambdas/functions/control-plane/src/gh-auth/gh-auth.ts
 }
 
 export async function createGithubAppAuth(
