@@ -4,8 +4,13 @@ import moment from 'moment';
 import nock from 'nock';
 
 import { RunnerInfo, RunnerList } from '../aws/runners.d';
+<<<<<<< HEAD
+import * as ghAuth from '../github/auth';
+import { listEC2Runners, terminateRunner, tag } from './../aws/runners';
+=======
 import * as ghAuth from '../gh-auth/gh-auth';
 import { listEC2Runners, terminateRunner } from './../aws/runners';
+>>>>>>> main
 import { githubCache } from './cache';
 import { scaleDown } from './scale-down';
 
@@ -33,13 +38,13 @@ jest.mock('./../aws/runners', () => ({
   terminateRunner: jest.fn(),
   listEC2Runners: jest.fn(),
 }));
-jest.mock('./../gh-auth/gh-auth');
+jest.mock('./../github/auth');
 jest.mock('./cache');
 
 const mocktokit = Octokit as jest.MockedClass<typeof Octokit>;
 const mockedAppAuth = mocked(ghAuth.createGithubAppAuth, { shallow: false });
 const mockedInstallationAuth = mocked(ghAuth.createGithubInstallationAuth, { shallow: false });
-const mockCreateClient = mocked(ghAuth.createOctoClient, { shallow: false });
+const mockCreateClient = mocked(ghAuth.createOctokitClient, { shallow: false });
 const mockListRunners = mocked(listEC2Runners);
 
 export interface TestData {

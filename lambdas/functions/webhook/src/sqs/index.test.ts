@@ -3,7 +3,7 @@ import { SendMessageCommandInput } from '@aws-sdk/client-sqs';
 import { ActionRequestMessage, GithubWorkflowEvent, sendActionRequest, sendWebhookEventToWorkflowJobQueue } from '.';
 import workflowjob_event from '../../test/resources/github_workflowjob_event.json';
 import { Config } from '../ConfigResolver';
-import { getParameter } from '@terraform-aws-github-runner/aws-ssm-util';
+import { getParameter } from '@aws-github-runner/aws-ssm-util';
 import { mocked } from 'jest-mock';
 
 const mockSQS = {
@@ -14,7 +14,7 @@ const mockSQS = {
 jest.mock('@aws-sdk/client-sqs', () => ({
   SQS: jest.fn().mockImplementation(() => mockSQS),
 }));
-jest.mock('@terraform-aws-github-runner/aws-ssm-util');
+jest.mock('@aws-github-runner/aws-ssm-util');
 
 describe('Test sending message to SQS.', () => {
   const queueUrl = 'https://sqs.eu-west-1.amazonaws.com/123456789/queued-builds';
@@ -26,6 +26,7 @@ describe('Test sending message to SQS.', () => {
     repositoryOwner: 'owner',
     queueId: queueUrl,
     queueFifo: false,
+    repoOwnerType: 'Organization',
   };
 
   afterEach(() => {

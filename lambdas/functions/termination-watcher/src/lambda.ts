@@ -1,4 +1,8 @@
 import middy from '@middy/core';
+<<<<<<< HEAD
+import { captureLambdaHandler, logger, metrics, setContext, tracer } from '@aws-github-runner/aws-powertools-util';
+import { logMetrics } from '@aws-lambda-powertools/metrics/middleware';
+=======
 import {
   captureLambdaHandler,
   logger,
@@ -7,6 +11,7 @@ import {
   tracer,
 } from '@terraform-aws-github-runner/aws-powertools-util';
 import { logMetrics } from '@aws-lambda-powertools/metrics';
+>>>>>>> main
 import { Context } from 'aws-lambda';
 
 import { handle as handleTerminationWarning } from './termination-warning';

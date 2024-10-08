@@ -288,6 +288,14 @@ module "runners" {
   pool_lambda_reserved_concurrent_executions = var.pool_lambda_reserved_concurrent_executions
 
   ssm_housekeeper = var.runners_ssm_housekeeper
+<<<<<<< HEAD
+  ebs_optimized   = var.runners_ebs_optimized
+
+  metrics = var.metrics
+
+  job_retry = var.job_retry
+=======
+>>>>>>> main
 }
 
 module "runner_binaries" {
@@ -380,9 +388,9 @@ locals {
     logging_retention_in_days = var.logging_retention_in_days
     role_path                 = var.role_path
     role_permissions_boundary = var.role_permissions_boundary
-    metrics_namespace         = var.metrics_namespace
     s3_bucket                 = var.lambda_s3_bucket
     tracing_config            = var.tracing_config
+    metrics                   = var.metrics
   }
 }
 

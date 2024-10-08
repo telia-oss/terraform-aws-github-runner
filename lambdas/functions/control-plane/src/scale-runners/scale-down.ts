@@ -1,12 +1,18 @@
 import { Octokit } from '@octokit/rest';
-import { createChildLogger } from '@terraform-aws-github-runner/aws-powertools-util';
+import { createChildLogger } from '@aws-github-runner/aws-powertools-util';
 import moment from 'moment';
 
+<<<<<<< HEAD
+import { createGithubAppAuth, createGithubInstallationAuth, createOctokitClient } from '../github/auth';
+import { bootTimeExceeded, listEC2Runners, tag, terminateRunner } from './../aws/runners';
+=======
 import { createGithubAppAuth, createGithubInstallationAuth, createOctoClient } from '../gh-auth/gh-auth';
 import { bootTimeExceeded, listEC2Runners, terminateRunner } from './../aws/runners';
+>>>>>>> main
 import { RunnerInfo, RunnerList } from './../aws/runners.d';
 import { GhRunners, githubCache } from './cache';
 import { ScalingDownConfig, getEvictionStrategy, getIdleRunnerCount } from './scale-down-config';
+import { metricGitHubAppRateLimit } from '../github/rate-limit';
 
 const logger = createChildLogger('scale-down');
 
@@ -26,7 +32,7 @@ async function getOrCreateOctokit(runner: RunnerInfo): Promise<Octokit> {
     ghesApiUrl = `${ghesBaseUrl}/api/v3`;
   }
   const ghAuthPre = await createGithubAppAuth(undefined, ghesApiUrl);
-  const githubClientPre = await createOctoClient(ghAuthPre.token, ghesApiUrl);
+  const githubClientPre = await createOctokitClient(ghAuthPre.token, ghesApiUrl);
 
   const installationId =
     runner.type === 'Org'
@@ -42,7 +48,7 @@ async function getOrCreateOctokit(runner: RunnerInfo): Promise<Octokit> {
           })
         ).data.id;
   const ghAuth = await createGithubInstallationAuth(installationId, ghesApiUrl);
-  const octokit = await createOctoClient(ghAuth.token, ghesApiUrl);
+  const octokit = await createOctokitClient(ghAuth.token, ghesApiUrl);
   githubCache.clients.set(key, octokit);
 
   return octokit;
@@ -62,6 +68,8 @@ async function getGitHubRunnerBusyState(client: Octokit, ec2runner: RunnerInfo, 
         });
 
   logger.info(`Runner '${ec2runner.instanceId}' - GitHub Runner ID '${runnerId}' - Busy: ${state.data.busy}`);
+
+  metricGitHubAppRateLimit(state.headers);
 
   return state.data.busy;
 }
